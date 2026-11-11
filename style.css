@@ -132,6 +132,14 @@ main{padding:22px 0 60px; min-height:60vh}
 .cat{font-size:11.5px;font-weight:700;color:#8a5cf6;background:#f3eeff;border-radius:999px;padding:2px 9px}
 .empty{color:var(--sub);text-align:center;padding:60px 0;font-size:14px}
 footer{color:#9aa4b5;text-align:center;font-size:12px;padding:26px 0 40px}
+footer .credit{color:#66707f;font-size:13px;line-height:1.9}
+footer .credit a{color:var(--brand);text-decoration:none;font-weight:600}
+footer .credit a:hover{text-decoration:underline}
+footer .sep{color:#c3cad6;margin:0 4px}
+footer .fineprint{margin-top:8px;font-size:11.5px;color:#a6aebc}
+.mcredit{padding:12px 20px 16px;border-top:1px solid var(--line);color:#9aa4b5;font-size:11.5px;text-align:center}
+.mcredit a{color:var(--brand);text-decoration:none}
+.mcredit a:hover{text-decoration:underline}
 @media(max-width:640px){
   .topbar{height:auto;padding:10px 0;flex-wrap:wrap}
   .search{flex:1 1 100%;max-width:none;order:3;margin-left:0}

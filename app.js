@@ -197,7 +197,7 @@ function renderModal(){
   else if(top.t==='encounter')html=detailEncounter(+top.k);
   else if(top.t==='trainer')html=detailTrainer(+top.k);
   else if(top.t==='frontier')html=detailFrontier(+top.k);
-  document.getElementById('modal').innerHTML=html;
+  document.getElementById('modal').innerHTML=html+'<div class="mcredit">原始文档 © <a href="https://github.com/Eemeliri/soulgold" target="_blank" rel="noopener">Eemeliri</a> · 中文翻译 © <a href="https://github.com/Giseribility" target="_blank" rel="noopener">Giseribility</a></div>';
   document.getElementById('modal').scrollTop=0;
   document.getElementById('overlay').classList.add('show');
 }
