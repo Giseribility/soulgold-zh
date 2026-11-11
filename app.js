@@ -19,6 +19,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function tbadge(t){var c=TCOLOR[t]||'#888';return '<span class="tbadge" style="background:'+c+'">'+esc(t)+'</span>';}
 function imgTag(path,cls){var src=SPRITE+String(path||'').replace(/^\//,'');return '<img class="'+cls+'" loading="lazy" src="'+src+'" alt="" onerror="this.style.display=\'none\';this.parentNode.insertAdjacentHTML(\'beforeend\',\'<span class=&quot;ph&quot;>?</span>\')">';}
 function monImg(path){return path?imgTag(path,'mini'):'<span class="mini ph">?</span>';}
+function ico(p,c){return p?imgTag(p,c):'';}
 function typeLink(name){
   var s=spByName[name];
   return s?('<a class="ilink" data-open="species:'+esc(s.slug)+'">'+esc(name)+'</a>'):esc(name);
@@ -74,7 +75,7 @@ function renderMoves(){
   var list=MV.filter(matchMove);
   document.getElementById('count').textContent='共 '+list.length+' 个招式';
   document.getElementById('view').innerHTML='<div class="rows">'+list.map(function(m){
-    return '<div class="row" data-open="move:'+esc(m.slug)+'"><div class="rname">'+esc(m.name)+tbadge(m.type)+'<span class="rcat '+m.cat+'">'+esc(m.cat)+'</span></div>'+
+    return '<div class="row" data-open="move:'+esc(m.slug)+'"><div class="rname">'+ico(m.icon,'ticon')+esc(m.name)+tbadge(m.type)+'<span class="rcat '+m.cat+'">'+esc(m.cat)+'</span></div>'+
       '<div class="rstats">威力 '+(m.power||'-')+' · 命中 '+(m.acc||'-')+' · PP '+(m.pp||'-')+(m.prio?' · 优先'+m.prio:'')+'</div>'+
       '<div class="rdesc">'+esc(m.desc||'')+'</div></div>';
   }).join('')+'</div>';
@@ -93,7 +94,7 @@ function renderItems(){
   var list=IT.filter(matchIt);
   document.getElementById('count').textContent='共 '+list.length+' 个道具';
   document.getElementById('view').innerHTML='<div class="rows">'+list.map(function(x){
-    return '<div class="row" data-open="item:'+esc(x.slug)+'"><div class="rname">'+esc(x.name)+'<span class="tpocket">'+esc(x.pocket)+'</span></div><div class="rdesc">'+esc(x.desc||'')+'</div></div>';
+    return '<div class="row" data-open="item:'+esc(x.slug)+'"><div class="rname">'+ico(x.icon,'iicon')+esc(x.name)+'<span class="tpocket">'+esc(x.pocket)+'</span></div><div class="rdesc">'+esc(x.desc||'')+'</div></div>';
   }).join('')+'</div>';
 }
 function matchTm(x){ if(!q)return true;var k=q.toLowerCase();return x.name.indexOf(q)>=0||x.label.toLowerCase().indexOf(k)>=0||(x.locs.join(' ').indexOf(q)>=0);}
@@ -101,7 +102,7 @@ function renderTm(){
   var list=TM.filter(matchTm);
   document.getElementById('count').textContent='共 '+list.length+' 个技能机';
   document.getElementById('view').innerHTML='<div class="rows">'+TM.map(function(x,i){return {x:x,i:i};}).filter(function(o){return matchTm(o.x);}).map(function(o){var x=o.x;
-    return '<div class="row" data-open="machine:'+o.i+'"><div class="rname"><b>'+esc(x.label)+'</b> '+esc(x.name)+tbadge(x.type)+'<span class="rcat '+x.cat+'">'+esc(x.cat)+'</span></div><div class="rdesc">'+esc(x.desc||'')+' · 获得：'+esc(x.locs.join('；')||'—')+'</div></div>';
+    return '<div class="row" data-open="machine:'+o.i+'"><div class="rname">'+ico(x.icon,'ticon')+'<b>'+esc(x.label)+'</b> '+esc(x.name)+tbadge(x.type)+'<span class="rcat '+x.cat+'">'+esc(x.cat)+'</span></div><div class="rdesc">'+esc(x.desc||'')+' · 获得：'+esc(x.locs.join('；')||'—')+'</div></div>';
   }).join('')+'</div>';
 }
 function matchEnc(e){ if(!q)return true;var k=q.toLowerCase();return e.name.indexOf(q)>=0;}
@@ -110,7 +111,7 @@ function renderEnc(){
   document.getElementById('count').textContent='共 '+list.length+' 个地点';
   document.getElementById('view').innerHTML='<div class="rows">'+list.map(function(o){var e=o.e;
     var cnt=0; e.variants.forEach(function(v){v.methods.forEach(function(m){cnt+=m.mons.length;});});
-    return '<div class="row" data-open="encounter:'+o.i+'"><div class="rname">'+esc(e.name)+'</div><div class="rdesc">'+e.variants.length+' 个时段 · 共 '+cnt+' 条遇敌记录</div></div>';
+    return '<div class="row" data-open="encounter:'+o.i+'"><div class="rname">'+ico(e.sprite,'mini')+esc(e.name)+'</div><div class="rdesc">'+e.variants.length+' 个时段 · 共 '+cnt+' 条遇敌记录</div></div>';
   }).join('')+'</div>';
 }
 function matchTr(t){ if(!q)return true;var k=q.toLowerCase();return (t.name||'').toLowerCase().indexOf(k)>=0||t.locs.join(' ').indexOf(q)>=0;}
@@ -118,7 +119,7 @@ function renderTr(){
   var list=TR.map(function(t,i){return{t:t,i:i};}).filter(function(o){return matchTr(o.t);});
   document.getElementById('count').textContent='共 '+list.length+' 名训练师';
   document.getElementById('view').innerHTML='<div class="rows">'+list.map(function(o){var t=o.t;
-    return '<div class="row" data-open="trainer:'+o.i+'"><div class="rname">'+esc(t.name)+'<span class="tpocket">'+esc(t.difficulty)+' · Lv.'+esc(t.avg)+'</span></div><div class="rdesc">'+esc(t.locs.join('、')||'—')+' · '+t.party.length+' 只宝可梦</div></div>';
+    return '<div class="row" data-open="trainer:'+o.i+'"><div class="rname">'+ico(t.sprite,'tricon')+esc(t.name)+'<span class="tpocket">'+esc(t.difficulty)+' · Lv.'+esc(t.avg)+'</span></div><div class="rdesc">'+esc(t.locs.join('、')||'—')+' · '+t.party.length+' 只宝可梦</div></div>';
   }).join('')+'</div>';
 }
 function matchFr(f){ if(!q)return true;var k=q.toLowerCase();return f.species.indexOf(q)>=0||(f.item&&f.item.toLowerCase().indexOf(k)>=0)||(f.ability&&f.ability.indexOf(q)>=0);}
@@ -126,7 +127,7 @@ function renderFr(){
   var list=FR.map(function(f,i){return{f:f,i:i};}).filter(function(o){return matchFr(o.f);});
   document.getElementById('count').textContent='共 '+list.length+' 套开拓区配置';
   document.getElementById('view').innerHTML='<div class="rows">'+list.slice(0,800).map(function(o){var f=o.f;
-    return '<div class="row" data-open="frontier:'+o.i+'"><div class="rname">'+typeLink(f.species)+'<span class="tpocket">'+esc(f.ability)+' · '+esc(f.nature)+'</span></div><div class="rdesc">'+esc(f.item||'无道具')+' · '+f.moves.map(function(m){return esc(m);}).join(' / ')+'</div></div>';
+    return '<div class="row" data-open="frontier:'+o.i+'"><div class="rname">'+ico(f.sprite,'mini')+typeLink(f.species)+'<span class="tpocket">'+esc(f.ability)+' · '+esc(f.nature)+'</span></div><div class="rdesc">'+esc(f.item||'无道具')+' · '+f.moves.map(function(m){return esc(m);}).join(' / ')+'</div></div>';
   }).join('')+'</div>'+(list.length>800?'<div class="morenote">仅显示前 800 条，请用搜索缩小范围</div>':'');
 }
 
@@ -149,16 +150,16 @@ function detailSpecies(slug){
 function detailAbility(name){var a=ABbyName[name];var kind=a?(a.kind==='official'?'<span class="badge off">官方</span>':'<span class="badge cus">自制</span>'):'';
   return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(name)+'</h2>'+(a&&a.en?'<div class="men">'+esc(a.en)+'</div>':'')+'</div></div><div class="mbody"><div class="sect"><h3>特性说明 '+kind+'</h3><div class="abdesc">'+esc(a&&a.desc?a.desc:'—')+'</div></div></div>';}
 function detailMove(slug){var m=MVbySlug[slug];if(!m)return '<div class="mempty">未找到</div>';
-  return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(m.name)+'</h2><div class="men">'+esc(m.en)+'</div><div class="types" style="margin-top:6px">'+tbadge(m.type)+'<span class="rcat '+m.cat+'">'+esc(m.cat)+'</span></div></div></div>'+
+  return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(m.name)+'</h2><div class="men">'+esc(m.en)+'</div><div class="types" style="margin-top:6px">'+ico(m.icon,'ticon')+tbadge(m.type)+'<span class="rcat '+m.cat+'">'+esc(m.cat)+'</span></div></div></div>'+
    '<div class="mbody"><div class="sect"><h3>招式数据</h3><div class="chips">'+
    '<span class="abchip">威力 '+(m.power||'-')+'</span><span class="abchip">命中 '+(m.acc||'-')+'</span><span class="abchip">PP '+(m.pp||'-')+'</span><span class="abchip">优先度 '+(m.prio||0)+'</span></div></div>'+
    '<div class="sect"><h3>说明</h3><div class="abdesc">'+esc(m.desc||'—')+'</div></div></div>';}
 function detailItem(slug){var x=ITbySlug[slug];if(!x)return '<div class="mempty">未找到</div>';
-  return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(x.name)+'</h2><div class="men">'+esc(x.en)+' · '+esc(x.pocket)+'</div></div></div>'+
+  return '<div class="mhead">'+navBtns()+'<div class="mimg">'+ico(x.icon,'')+'</div><div><h2>'+esc(x.name)+'</h2><div class="men">'+esc(x.en)+' · '+esc(x.pocket)+'</div></div></div>'+
    '<div class="mbody"><div class="sect"><h3>说明</h3><div class="abdesc">'+esc(x.desc||'—')+'</div></div>'+
    (x.locs&&x.locs.length?'<div class="sect"><h3>获得地点</h3><div class="chips">'+x.locs.map(function(l){return '<span class="abchip">'+esc(l)+'</span>';}).join('')+'</div></div>':'')+'</div>';}
 function detailMachine(i){var x=TM[i];if(!x)return '<div class="mempty">未找到</div>';
-  return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(x.label)+' '+esc(x.name)+'</h2><div class="men">'+esc(x.name)+' · '+esc(x.type)+' · '+esc(x.cat)+'</div></div></div>'+
+  return '<div class="mhead">'+navBtns()+'<div class="mimg">'+ico(x.icon,'')+'</div><div><h2>'+esc(x.label)+' '+esc(x.name)+'</h2><div class="men">'+esc(x.name)+' · '+esc(x.type)+' · '+esc(x.cat)+'</div></div></div>'+
    '<div class="mbody"><div class="sect"><h3>招式数据</h3><div class="chips"><span class="abchip">威力 '+(x.power||'-')+'</span><span class="abchip">命中 '+(x.acc||'-')+'</span><span class="abchip">PP '+(x.pp||'-')+'</span></div></div>'+
    '<div class="sect"><h3>说明</h3><div class="abdesc">'+esc(x.desc||'—')+'</div></div>'+
    '<div class="sect"><h3>获得地点</h3><div class="chips">'+(x.locs.length?x.locs.map(function(l){return '<span class="abchip">'+esc(l)+'</span>';}).join(''):'—')+'</div></div></div>';}
@@ -177,7 +178,7 @@ function detailTrainer(i){var t=TR[i];if(!t)return '<div class="mempty">未找�
       '<div class="pmi">特性：'+esc(p.ability||'—')+(p.innate&&p.innate.length?' · 固有：'+p.innate.map(function(a){return esc(a);}).join('/'):'')+(p.item?' · 道具：'+esc(p.item):'')+'</div>'+
       '<div class="pmm">'+p.moves.map(function(m){return '<span class="abchip">'+esc(m)+'</span>';}).join('')+'</div></div>';
   }).join('');
-  return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(t.name)+'</h2><div class="men">'+esc(t.difficulty)+' · 平均 Lv.'+esc(t.avg)+' · '+esc(t.locs.join('、')||'—')+'</div></div></div>'+
+  return '<div class="mhead">'+navBtns()+'<div class="mimg">'+ico(t.sprite,'')+'</div><div><h2>'+esc(t.name)+'</h2><div class="men">'+esc(t.difficulty)+' · 平均 Lv.'+esc(t.avg)+' · '+esc(t.locs.join('、')||'—')+'</div></div></div>'+
    '<div class="mbody"><div class="sect"><h3>队伍（'+t.party.length+'）</h3>'+party+'</div></div>';}
 function detailFrontier(i){var f=FR[i];if(!f)return '<div class="mempty">未找到</div>';
   return '<div class="mhead">'+navBtns()+'<div><h2>'+typeLink(f.species)+'</h2><div class="men">'+esc(f.ability||'')+' · '+esc(f.nature||'')+'</div></div></div>'+
