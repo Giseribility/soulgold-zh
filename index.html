@@ -9,35 +9,21 @@
 <body>
 <header>
   <div class="wrap topbar">
-    <div class="logo"><span class="dot"></span>Soulgold 图鉴<small>中文版</small></div>
-    <div class="tabs">
-      <button class="tab active" data-view="dex">图鉴</button>
-      <button class="tab" data-view="ability">特性</button>
-    </div>
+    <div class="logo"><span class="dot"></span>Soulgold<small>中文版</small></div>
+    <div class="tabs" id="tabs"></div>
     <div class="search">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#66707f" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-      <input id="q" type="text" placeholder="搜索名称 / 编号 / 英文…" autocomplete="off">
+      <input id="q" type="text" placeholder="搜索…" autocomplete="off">
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <div id="dexView">
-    <div class="toolbar" id="typebar">
-      <span class="result-count" id="dexCount"></span>
-    </div>
-    <div class="grid" id="dexGrid"></div>
-  </div>
-
-  <div id="abilityView" style="display:none">
-    <div class="toolbar">
-      <span class="result-count" id="abCount"></span>
-    </div>
-    <div class="ablist" id="abList"></div>
-  </div>
+  <div class="toolbar" id="toolbar"><span class="result-count" id="count"></span></div>
+  <div id="view"></div>
 </main>
 
-<footer>Soulgold 文档中文版 · 仅含图鉴与特性 · 数据来源 Eemeliri/soulgold</footer>
+<footer>Soulgold 文档中文版 · 数据来源 Eemeliri/soulgold · 精灵图热链官方站</footer>
 
 <div class="overlay" id="overlay">
   <div class="modal" id="modal"></div>
