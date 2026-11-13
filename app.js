@@ -14,6 +14,11 @@ IT.forEach(function(i){ITbySlug[i.slug]=i;});
 var ABSP={};
 function _abAdd(list,slot,s){ (list||[]).forEach(function(n){ if(!ABSP[n])ABSP[n]={regular:[],hidden:[],innate:[]}; if(ABSP[n][slot].indexOf(s)<0) ABSP[n][slot].push(s); }); }
 SP.forEach(function(s){ _abAdd(s.regular,'regular',s); _abAdd(s.hidden,'hidden',s); _abAdd(s.innate,'innate',s); });
+// 地点 -> 遭遇 索引
+var ENCbyName={}; ENC.forEach(function(e,i){ if(!(e.name in ENCbyName)) ENCbyName[e.name]=i; });
+var ENCkeys=Object.keys(ENCbyName).sort(function(a,b){return b.length-a.length;});
+function encIndexFor(name){ if(name in ENCbyName)return ENCbyName[name]; for(var i=0;i<ENCkeys.length;i++){var k=ENCkeys[i]; if(name.indexOf(k+' ')===0) return ENCbyName[k];} return -1; }
+function locLink(text){ var t=String(text==null?'':text); var base=t.split('（')[0].trim(); var i=encIndexFor(base); return i>=0?('<a class="ilink" data-open="encounter:'+i+'">'+esc(t)+'</a>'):esc(t); }
 
 var view='dex', q='', typeFilter='全部';
 var stack=[];
@@ -146,7 +151,7 @@ function locsSection(locs){
   if(!locs||!locs.length) return '';
   return '<div class="sect"><h3>获得地点 · 野外遭遇</h3><div class="loclist">'+locs.map(function(L){
     var extra=[L.method,L.time,(L.lv!=null?('Lv.'+L.lv):''),(L.rate!=null?('概率'+L.rate+'%'):'')].filter(function(x){return x&&x!=='';}).join(' · ');
-    return '<div class="locrow"><span class="locname">'+esc(L.name||'—')+'</span>'+(extra?'<span class="locextra">'+esc(extra)+'</span>':'')+'</div>';
+    return '<div class="locrow"><span class="locname">'+locLink(L.name||'—')+'</span>'+(extra?'<span class="locextra">'+esc(extra)+'</span>':'')+'</div>';
   }).join('')+'</div></div>';
 }
 function evoSection(evos){
@@ -169,23 +174,25 @@ function detailAbility(name){var a=ABbyName[name];var kind=a?(a.kind==='official
   var grp=function(title,arr){if(!arr||!arr.length)return '';return '<div class="sect"><h3>'+title+'（'+arr.length+'）</h3><div class="chips">'+arr.map(function(s){return '<a class="abchip link" data-open="species:'+esc(s.slug)+'">'+esc(s.name)+'</a>';}).join('')+'</div></div>';};
   return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(name)+'</h2>'+(a&&a.en?'<div class="men">'+esc(a.en)+'</div>':'')+'</div></div><div class="mbody"><div class="sect"><h3>特性说明 '+kind+'</h3><div class="abdesc">'+esc(a&&a.desc?a.desc:'—')+'</div></div>'+grp('常规特性',idx.regular)+grp('隐藏特性',idx.hidden)+grp('固有特性',idx.innate)+'</div>';}
 function detailMove(slug){var m=MVbySlug[slug];if(!m)return '<div class="mempty">未找到</div>';
+  var tms=TM.filter(function(t){return t.moveSlug===m.slug;});
+  var tmSec=tms.length?('<div class="sect"><h3>学习机（TM/HM）获取地点</h3>'+tms.map(function(t){return '<div class="locrow"><span class="locname">'+esc(t.label)+'</span><span class="locextra">'+(t.locs&&t.locs.length?t.locs.map(locLink).join('；'):'—')+'</span></div>';}).join('')+'</div>'):'';
   return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(m.name)+'</h2><div class="men">'+esc(m.en)+'</div><div class="types" style="margin-top:6px">'+ico(m.icon,'ticon')+tbadge(m.type)+'<span class="rcat '+m.cat+'">'+esc(m.cat)+'</span></div></div></div>'+
    '<div class="mbody"><div class="sect"><h3>招式数据</h3><div class="chips">'+
    '<span class="abchip">威力 '+(m.power||'-')+'</span><span class="abchip">命中 '+(m.acc||'-')+'</span><span class="abchip">PP '+(m.pp||'-')+'</span><span class="abchip">优先度 '+(m.prio||0)+'</span></div></div>'+
-   '<div class="sect"><h3>说明</h3><div class="abdesc">'+esc(m.desc||'—')+'</div></div></div>';}
+   '<div class="sect"><h3>说明</h3><div class="abdesc">'+esc(m.desc||'—')+'</div></div>'+tmSec+'</div>';}
 function detailItem(slug){var x=ITbySlug[slug];if(!x)return '<div class="mempty">未找到</div>';
   return '<div class="mhead">'+navBtns()+'<div class="mimg">'+ico(x.icon,'')+'</div><div><h2>'+esc(x.name)+'</h2><div class="men">'+esc(x.en)+' · '+esc(x.pocket)+'</div></div></div>'+
    '<div class="mbody"><div class="sect"><h3>说明</h3><div class="abdesc">'+esc(x.desc||'—')+'</div></div>'+
-   (x.locs&&x.locs.length?'<div class="sect"><h3>获得地点</h3><div class="chips">'+x.locs.map(function(l){return '<span class="abchip">'+esc(l)+'</span>';}).join('')+'</div></div>':'')+'</div>';}
+   (x.locs&&x.locs.length?'<div class="sect"><h3>获得地点</h3><div class="chips">'+x.locs.map(function(l){return '<span class="abchip">'+locLink(l)+'</span>';}).join('')+'</div></div>':'')+'</div>';}
 function detailMachine(i){var x=TM[i];if(!x)return '<div class="mempty">未找到</div>';
   return '<div class="mhead">'+navBtns()+'<div class="mimg">'+ico(x.icon,'')+'</div><div><h2>'+esc(x.label)+' '+esc(x.name)+'</h2><div class="men">'+esc(x.name)+' · '+esc(x.type)+' · '+esc(x.cat)+'</div></div></div>'+
    '<div class="mbody"><div class="sect"><h3>招式数据</h3><div class="chips"><span class="abchip">威力 '+(x.power||'-')+'</span><span class="abchip">命中 '+(x.acc||'-')+'</span><span class="abchip">PP '+(x.pp||'-')+'</span></div></div>'+
    '<div class="sect"><h3>说明</h3><div class="abdesc">'+esc(x.desc||'—')+'</div></div>'+
-   '<div class="sect"><h3>获得地点</h3><div class="chips">'+(x.locs.length?x.locs.map(function(l){return '<span class="abchip">'+esc(l)+'</span>';}).join(''):'—')+'</div></div></div>';}
+   '<div class="sect"><h3>获得地点</h3><div class="chips">'+(x.locs.length?x.locs.map(function(l){return '<span class="abchip">'+locLink(l)+'</span>';}).join(''):'—')+'</div></div></div>';}
 function detailEncounter(i){var e=ENC[i];if(!e)return '<div class="mempty">未找到</div>';
   var body=e.variants.map(function(v){
     var methods=v.methods.map(function(m){
-      var rows=m.mons.map(function(o){return '<tr><td>'+monImg(o.sprite)+' '+typeLink(o.name)+'</td><td class="num">'+(o.min===o.max?('Lv.'+o.min):('Lv.'+o.min+'-'+o.max))+'</td><td class="num">'+o.rate+'%</td></tr>';}).join('');
+      var rows=m.mons.map(function(o){var held=(o.items&&o.items.length)?'<div class="held">携带：'+o.items.map(function(i){return esc(i.name)+'（'+esc(i.rarity)+' '+i.pct+'%）';}).join('、')+'</div>':'';return '<tr><td>'+monImg(o.sprite)+' '+typeLink(o.name)+held+'</td><td class="num">'+(o.min===o.max?('Lv.'+o.min):('Lv.'+o.min+'-'+o.max))+'</td><td class="num">'+o.rate+'%</td></tr>';}).join('');
       return '<div class="subsec"><div class="subt">'+esc(m.method)+'</div><table class="mtab"><thead><tr><th>宝可梦</th><th>等级</th><th>概率</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
     }).join('');
     return '<div class="sect"><h3>'+esc(v.time)+'</h3>'+methods+'</div>';
