@@ -11,6 +11,9 @@ SP.forEach(function(s){SPbySlug[s.slug]=s;if(!spByName[s.name])spByName[s.name]=
 AB.forEach(function(a){if(!ABbyName[a.name])ABbyName[a.name]=a;});
 MV.forEach(function(m){MVbySlug[m.slug]=m;if(!MVbyName[m.name])MVbyName[m.name]=m;});
 IT.forEach(function(i){ITbySlug[i.slug]=i;});
+var ABSP={};
+function _abAdd(list,slot,s){ (list||[]).forEach(function(n){ if(!ABSP[n])ABSP[n]={regular:[],hidden:[],innate:[]}; if(ABSP[n][slot].indexOf(s)<0) ABSP[n][slot].push(s); }); }
+SP.forEach(function(s){ _abAdd(s.regular,'regular',s); _abAdd(s.hidden,'hidden',s); _abAdd(s.innate,'innate',s); });
 
 var view='dex', q='', typeFilter='全部';
 var stack=[];
@@ -139,16 +142,32 @@ function render(){
 /* ---------- modal ---------- */
 function navBtns(){return '<div class="mnav">'+(stack.length>1?'<button class="mback" data-back="1">← 返回</button>':'')+'<button class="mclose" data-close="1">✕</button></div>';}
 function statBars(st){var mx=200;return STATS.map(function(p){var v=st[p[0]]||0;var w=Math.min(100,Math.round(v/mx*100));return '<div class="statrow"><span class="lab">'+p[1]+'</span><span class="val">'+v+'</span><div class="bar"><i style="width:'+w+'%"></i></div></div>';}).join('');}
+function locsSection(locs){
+  if(!locs||!locs.length) return '';
+  return '<div class="sect"><h3>获得地点 · 野外遭遇</h3><div class="loclist">'+locs.map(function(L){
+    var extra=[L.method,L.time,(L.lv!=null?('Lv.'+L.lv):''),(L.rate!=null?('概率'+L.rate+'%'):'')].filter(function(x){return x&&x!=='';}).join(' · ');
+    return '<div class="locrow"><span class="locname">'+esc(L.name||'—')+'</span>'+(extra?'<span class="locextra">'+esc(extra)+'</span>':'')+'</div>';
+  }).join('')+'</div></div>';
+}
+function evoSection(evos){
+  if(!evos||!evos.length) return '';
+  return '<div class="sect"><h3>进化方式</h3><div class="evolist">'+evos.map(function(e){
+    var t=e.toSlug?('<a class="ilink" data-open="species:'+esc(e.toSlug)+'">'+esc(e.to)+'</a>'):esc(e.to);
+    return '<div class="evorow"><span class="evohow">'+esc(e.how||'')+'</span><span class="evoarrow">→</span>'+t+'</div>';
+  }).join('')+'</div></div>';
+}
 function abGroup(title,arr){if(!arr||!arr.length)return '';var u=[];arr.forEach(function(n){if(u.indexOf(n)<0)u.push(n);});return '<div class="sect"><h3>'+title+'</h3><div class="chips">'+u.map(function(n){return '<span class="abchip'+(ABbyName[n]?' link" data-open="ability:'+esc(n):'')+'">'+esc(n)+'</span>';}).join('')+'</div></div>';}
 
 function detailSpecies(slug){
   var s=SPbySlug[slug];if(!s)return '<div class="mempty">未找到</div>';
   var cats=(s.categories&&s.categories.length)?'<div class="sect"><h3>分类</h3><div class="chips">'+s.categories.map(function(c){return '<span class="cat">'+esc(c)+'</span>';}).join('')+'</div></div>':'';
   return '<div class="mhead">'+navBtns()+'<div class="mimg">'+imgTag(s.sprite,'')+'</div><div><div class="mdex">No.'+s.dex+'</div><h2>'+esc(s.name)+'</h2><div class="men">'+esc(s.en)+'</div><div class="types" style="margin-top:6px">'+s.types.map(tbadge).join('')+'</div></div></div>'+
-   '<div class="mbody"><div class="sect"><h3>种族值 · 合计 '+s.bst+'</h3>'+statBars(s.stats)+'</div>'+abGroup('常规特性',s.regular)+abGroup('隐藏特性',s.hidden)+abGroup('固有特性',s.innate)+cats+'</div>';
+   '<div class="mbody"><div class="sect"><h3>种族值 · 合计 '+s.bst+'</h3>'+statBars(s.stats)+'</div>'+abGroup('常规特性',s.regular)+abGroup('隐藏特性',s.hidden)+abGroup('固有特性',s.innate)+cats+evoSection(s.evo)+locsSection(s.locs)+'</div>';
 }
 function detailAbility(name){var a=ABbyName[name];var kind=a?(a.kind==='official'?'<span class="badge off">官方</span>':'<span class="badge cus">自制</span>'):'';
-  return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(name)+'</h2>'+(a&&a.en?'<div class="men">'+esc(a.en)+'</div>':'')+'</div></div><div class="mbody"><div class="sect"><h3>特性说明 '+kind+'</h3><div class="abdesc">'+esc(a&&a.desc?a.desc:'—')+'</div></div></div>';}
+  var idx=ABSP[name]||{regular:[],hidden:[],innate:[]};
+  var grp=function(title,arr){if(!arr||!arr.length)return '';return '<div class="sect"><h3>'+title+'（'+arr.length+'）</h3><div class="chips">'+arr.map(function(s){return '<a class="abchip link" data-open="species:'+esc(s.slug)+'">'+esc(s.name)+'</a>';}).join('')+'</div></div>';};
+  return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(name)+'</h2>'+(a&&a.en?'<div class="men">'+esc(a.en)+'</div>':'')+'</div></div><div class="mbody"><div class="sect"><h3>特性说明 '+kind+'</h3><div class="abdesc">'+esc(a&&a.desc?a.desc:'—')+'</div></div>'+grp('常规特性',idx.regular)+grp('隐藏特性',idx.hidden)+grp('固有特性',idx.innate)+'</div>';}
 function detailMove(slug){var m=MVbySlug[slug];if(!m)return '<div class="mempty">未找到</div>';
   return '<div class="mhead">'+navBtns()+'<div><h2>'+esc(m.name)+'</h2><div class="men">'+esc(m.en)+'</div><div class="types" style="margin-top:6px">'+ico(m.icon,'ticon')+tbadge(m.type)+'<span class="rcat '+m.cat+'">'+esc(m.cat)+'</span></div></div></div>'+
    '<div class="mbody"><div class="sect"><h3>招式数据</h3><div class="chips">'+
